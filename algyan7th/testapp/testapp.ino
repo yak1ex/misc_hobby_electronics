@@ -107,6 +107,7 @@ void loop(void) {
 }
 #endif
 
+#if 0
 const int LED = 26;
 
 #include <SPI.h>
@@ -171,3 +172,91 @@ void loop(void) {
   digitalWrite(LED, LOW);
   delay(500);
 }
+#endif
+
+#include "PCF8574.h"
+
+PCF8574 pcf8574(0x20);
+
+unsigned long lastTime;
+void setup(void) {
+    Serial.begin(115200);
+    delay(1000);
+    Serial.println("INIT");
+
+    pcf8574.pinMode(P4, OUTPUT); // 1:SD(on TFT) 0:CAM
+    // IO12: SD_MISO / D4
+    // IO13: SD_MOSI / VSYNC
+    // IO14: SD_SCK  / PCLK
+    // IO15: SD_CS   / XCLK
+    pcf8574.pinMode(P5, INPUT); // SW
+    Serial.print("Init pcf8574...");
+    if(pcf8574.begin()) {
+        Serial.println("OK");
+    } else {
+        Serial.println("KO");
+    }
+}
+
+void loop(void) {
+    uint8_t val = pcf8574.digitalRead(P5);
+    if(val) {
+        lastTime = millis();
+    }
+    if(millis() - lastTime < 1000) {
+        Serial.print("P5 ")
+        Serial.println(val);
+    }
+    int aval = analogRead(33);
+    Serial.print("A5(IO33) ")
+    Serial.println(aval);
+    delay(100);
+}
+
+// EXPANDER(0x20)
+// SDA(SDA(IO21))
+// SCL(SCL(IO22))
+
+// TFT
+// CS(IO5)
+// SCK(IO18)
+// MISO(IO19)
+// MOSI(IO23)
+// DC(IO27)
+
+// SD_MISO(IO12)
+// SD_MOSI(IO13)
+// SD_SCK(IO14)
+// SD_CS(IO15)
+
+// CAM(0x21)
+// SDA(SDA(IO21))
+// SCL(SCL(IO22))
+// VSYNC(IO13)
+// PCLK(IO14)
+// XCLK(IO15)
+// D7(IO17)
+// D6(IO16)
+// D5(IO2)
+// D4(IO12)
+// D3(IO35)
+// D2(IO34)
+// D1(SENSOR_VN(IO39))
+// D0(SENSOR_VP(IO36))
+
+// FRAM1
+// CS(IO4)
+// SCK(IO18)
+// SO(IO19)
+// SI(IO23)
+// FRAM2
+// CS(IO32)
+// SCK(IO18)
+// SO(IO19)
+// SI(IO23)
+
+// LED
+// IO26
+
+// MIC
+// IO33
