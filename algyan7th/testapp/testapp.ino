@@ -181,6 +181,7 @@ PCF8574 pcf8574(0x20);
 unsigned long lastTime;
 void setup(void) {
     Serial.begin(115200);
+    Wire.begin(21,22);
     delay(1000);
     Serial.println("INIT");
 
@@ -204,13 +205,14 @@ void loop(void) {
         lastTime = millis();
     }
     if(millis() - lastTime < 1000) {
-        Serial.print("P5 ")
+        Serial.print("P5 ");
         Serial.println(val);
     }
     int aval = analogRead(33);
-    Serial.print("A5(IO33) ")
-    Serial.println(aval);
-    delay(100);
+//    Serial.print("A5(IO33) ");
+//    Serial.println(aval);
+    delay(10);
+}
 }
 
 // EXPANDER(0x20)
