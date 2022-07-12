@@ -216,6 +216,7 @@ void loop(void) {
 }
 #endif
 
+#if 0
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
@@ -557,6 +558,27 @@ unsigned long testFilledRoundRects() {
 
   return micros() - start;
 }
+#endif
+
+#include "Adafruit_GFX.h"
+#include "Adafruit_ILI9341.h"
+
+Adafruit_ILI9341 tft = Adafruit_ILI9341(5 /*TFT_CS*/, 27 /*TFT_DC*/, 23 /*TFT_MOSI*/, 18/*TFT_CLK*/, -1 /*TFT_RST*/, 12 /*TFT_MISO*/);
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("ILI9341 Test!"); 
+ 
+  tft.begin();
+  tft.setRotation(1);
+}
+
+void loop() {
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setCursor(0, 0);
+  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(2);
+  tft.println("Hello World!");
+  delay(1000);
 }
 
 // EXPANDER(0x20)
