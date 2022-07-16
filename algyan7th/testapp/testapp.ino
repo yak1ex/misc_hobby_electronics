@@ -560,6 +560,7 @@ unsigned long testFilledRoundRects() {
 }
 #endif
 
+#if 0
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
@@ -580,10 +581,270 @@ void loop() {
   tft.println("Hello World!");
   delay(1000);
 }
+#endif
 
+#if 0
+#include "PCF8574.h"
+#include "mySD.h"
+#include "SPI.h"
+
+PCF8574 pcf8574(0x20);
+Sd2Card card;
+SdVolume volume;
+SdFile root;
+
+void setup(){
+    Serial.begin(115200);
+    delay(1000);
+    while (!Serial) delay(10);
+    Wire.begin();
+    Serial.print("Init pcf8574...");
+    pcf8574.pinMode(P4, OUTPUT);
+    if(pcf8574.begin()) {
+        Serial.println("OK");
+    } else {
+        Serial.println("KO");
+    }
+    pcf8574.digitalWrite(P4, HIGH); // SD
+    pinMode(SS, OUTPUT);
+    while (!card.init(SPI_HALF_SPEED, 15 /*CS*/, 13 /*MOSI*/, 12 /*MISO*/, 14 /*SCK*/)) {
+      Serial.println("initialization failed. Things to check:");
+      Serial.println("* is a card is inserted?");
+      Serial.println("* Is your wiring correct?");
+      Serial.println("* did you change the chipSelect pin to match your shield or module?");
+    } 
+   // print the type of card
+  Serial.print("\nCard type: ");
+  switch(card.type()) {
+    case SD_CARD_TYPE_SD1:
+      Serial.println("SD1");
+      break;
+    case SD_CARD_TYPE_SD2:
+      Serial.println("SD2");
+      break;
+    case SD_CARD_TYPE_SDHC:
+      Serial.println("SDHC");
+      break;
+    default:
+      Serial.println("Unknown");
+  }
+
+  // Now we will try to open the 'volume'/'partition' - it should be FAT16 or FAT32
+  if (!volume.init(card)) {
+    Serial.println("Could not find FAT16/FAT32 partition.\nMake sure you've formatted the card");
+    return;
+  }
+
+
+  // print the type and size of the first FAT-type volume
+  uint32_t volumesize;
+  Serial.print("\nVolume type is FAT");
+  Serial.println(volume.fatType(), DEC);
+  Serial.println();
+  
+  volumesize = volume.blocksPerCluster();    // clusters are collections of blocks
+  volumesize *= volume.clusterCount();       // we'll have a lot of clusters
+  volumesize *= 512;                            // SD card blocks are always 512 bytes
+  Serial.print("Volume size (bytes): ");
+  Serial.println(volumesize);
+  Serial.print("Volume size (Kbytes): ");
+  volumesize /= 1024;
+  Serial.println(volumesize);
+  Serial.print("Volume size (Mbytes): ");
+  volumesize /= 1024;
+  Serial.println(volumesize);
+
+  
+  Serial.println("\nFiles found on the card (name, date and size in bytes): ");
+  root.openRoot(volume);
+  
+  // list all files in the card with date and size
+  root.ls(LS_R | LS_DATE | LS_SIZE);
+}
+
+void loop(){
+}
+#endif
+
+#if 1
+#include "PCF8574.h"
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
+SPIClass spiSD(HSPI);
+
+PCF8574 pcf8574(0x20);
+
+void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
+    Serial.printf("Listing directory: %s\n", dirname);
+
+    File root = fs.open(dirname);
+    if(!root){
+        Serial.println("Failed to open directory");
+        return;
+    }
+    if(!root.isDirectory()){
+        Serial.println("Not a directory");
+        return;
+    }
+
+    File file = root.openNextFile();
+    while(file){
+        if(file.isDirectory()){
+            Serial.print("  DIR : ");
+            Serial.println(file.name());
+            if(levels){
+                listDir(fs, file.path(), levels -1);
+            }
+        } else {
+            Serial.print("  FILE: ");
+            Serial.print(file.name());
+            Serial.print("  SIZE: ");
+            Serial.println(file.size());
+        }
+        file = root.openNextFile();
+    }
+}
+
+void setup(){
+    Serial.begin(115200);
+    delay(1000);
+    while (!Serial) delay(10);
+    Wire.begin();
+    Serial.print("Init pcf8574...");
+    pcf8574.pinMode(P4, OUTPUT);
+    if(pcf8574.begin()) {
+        Serial.println("OK");
+    } else {
+        Serial.println("KO");
+    }
+    pcf8574.digitalWrite(P4, HIGH); // SD
+    pinMode(SS, OUTPUT);
+    spiSD.begin(14 /*CLK*/, 12 /*MISO*/, 13 /*MOSI*/, 15 /*CS*/);
+    while (!SD.begin(15, spiSD, 24000000)) {
+      delay(1000);
+      Serial.println("Card Mount Failed");
+    } 
+
+    uint8_t cardType = SD.cardType();
+
+    if(cardType == CARD_NONE){
+        Serial.println("No SD card attached");
+        return;
+    }
+
+    Serial.print("SD Card Type: ");
+    if(cardType == CARD_MMC){
+        Serial.println("MMC");
+    } else if(cardType == CARD_SD){
+        Serial.println("SDSC");
+    } else if(cardType == CARD_SDHC){
+        Serial.println("SDHC");
+    } else {
+        Serial.println("UNKNOWN");
+    }
+
+    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+    Serial.printf("SD Card Size: %lluMB\n", cardSize);
+
+    listDir(SD, "/", 0);
+    Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
+    Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+}
+
+void loop(){
+}
+#endif
+
+
+#if 0
+#include "OV7670.h"
+#include "PCF8574.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_ILI9341.h"
+
+//Adafruit_ILI9341 tft = Adafruit_ILI9341(5 /*TFT_CS*/, 27 /*TFT_DC*/, 23 /*TFT_MOSI*/, 18/*TFT_CLK*/, -1 /*TFT_RST*/, 12 /*TFT_MISO*/);
+Adafruit_ILI9341 tft = Adafruit_ILI9341(5 /*TFT_CS*/, 27 /*TFT_DC*/, -1 /*TFT_RST*/);
+
+PCF8574 pcf8574(0x20);
+
+#define CAM_MODE QVGA
+#if CAM_MODE == QVGA
+#define CAM_WIDTH 320
+#define CAM_HEIGHT 240
+#else
+#define CAM_WIDTH 176
+#define CAM_HEIGHT 144
+uint16_t buf[CAM_WIDTH*CAM_HEIGHT];
+#endif
+OV7670 cam;
+const camera_config_t cam_conf = {
+  .D0 = 36,
+  .D1 = 39,
+  .D2 = 34,
+  .D3 = 35,
+  .D4 = 12,
+  .D5 = 2,
+  .D6 = 16,
+  .D7 = 17,
+  .XCLK = 15,
+  .PCLK = 14,
+  .VSYNC = 13,
+  .xclk_freq_hz = 10000000,     // XCLK 10MHz
+  .ledc_timer   = LEDC_TIMER_0,
+  .ledc_channel = LEDC_CHANNEL_0  
+};
+
+void setup(){
+    Serial.begin(115200);
+    while (!Serial) delay(10);
+    Wire.begin();
+    Wire.setClock(400000);
+    Serial.print("Init pcf8574...");
+    pcf8574.pinMode(P4, OUTPUT);
+    if(pcf8574.begin()) {
+        Serial.println("OK");
+    } else {
+        Serial.println("KO");
+    }
+    pcf8574.digitalWrite(P4, LOW); // CAM
+
+    Serial.println("OV7670 camera Init...");
+    esp_err_t err = cam.init(&cam_conf, CAM_MODE, RGB565);    // カメラを初期化
+    if(err != ESP_OK)   Serial.println("cam.init ERROR");
+  
+    cam.setPCLK(2, DBLV_CLK_x4);  // PCLK 設定 : 10MHz / (pre+1) * 4 --> 13.3MHz  
+    cam.vflip( false );   // 画面１８０度回転
+   
+    Serial.printf("cam MID = %X\n\r",cam.getMID());
+    Serial.printf("cam PID = %X\n\r",cam.getPID());
+
+    SPI.setFrequency( 24000000 );
+    tft.begin();
+    tft.setRotation(3);
+}
+
+void loop() {
+#if CAM_MODE == QVGA
+    uint16_t *buf;
+    for(int y = 0; y < CAM_HEIGHT; ++y) {
+        buf = cam.getLine( y + 1 );
+        tft.drawRGBBitmap( 0, y, buf, CAM_WIDTH, 1);
+    }
+#else
+    cam.getFrame( (uint8_t*)buf );
+//    tft.drawRGBBitmap( 0, 0, buf, CAM_WIDTH, CAM_HEIGHT);
+    tft.startWrite();
+    tft.setAddrWindow(0, 0, CAM_WIDTH, CAM_HEIGHT);
+    tft.writePixels(buf, CAM_WIDTH * CAM_HEIGHT, true, false);
+    tft.endWrite();
+#endif
+}
+#endif
 // EXPANDER(0x20)
 // SDA(SDA(IO21))
 // SCL(SCL(IO22))
+// P4 1:SD 0:CAM
 
 // TFT
 // CS(IO5)
