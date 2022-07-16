@@ -772,7 +772,7 @@ void loop(){
 }
 #endif
 
-#if 1
+#if 0
 #include "PCF8574.h"
 #include "SPI.h"
 // #define USE_STANDARD_SPI_LIBRARY 2 in SdFatConfig.h
@@ -910,51 +910,23 @@ void loop() {
 #endif
 }
 #endif
-// EXPANDER(0x20)
-// SDA(SDA(IO21))
-// SCL(SCL(IO22))
-// P4 1:SD 0:CAM
 
-// TFT
-// CS(IO5)
-// SCK(IO18)
-// MISO(IO19)
-// MOSI(IO23)
-// DC(IO27)
+#if 0
+#include "Adafruit_GFX.h"
+#include "Adafruit_ILI9341.h"
+#include "algyan_logo.h"
 
-// SD_MISO(IO12)
-// SD_MOSI(IO13)
-// SD_SCK(IO14)
-// SD_CS(IO15)
+Adafruit_ILI9341 tft = Adafruit_ILI9341(5 /*TFT_CS*/, 27 /*TFT_DC*/, -1 /*TFT_RST*/);
 
-// CAM(0x21)
-// SDA(SDA(IO21))
-// SCL(SCL(IO22))
-// VSYNC(IO13)
-// PCLK(IO14)
-// XCLK(IO15)
-// D7(IO17)
-// D6(IO16)
-// D5(IO2)
-// D4(IO12)
-// D3(IO35)
-// D2(IO34)
-// D1(SENSOR_VN(IO39))
-// D0(SENSOR_VP(IO36))
+void setup(){
+    Serial.begin(115200);
+    while (!Serial) delay(10);
+    Wire.begin();
+    tft.begin();
+    tft.setRotation(3);
+    tft.drawRGBBitmap( 0, 0, algyan_logo, ALGYAN_WIDTH, ALGYAN_HEIGHT );
+}
 
-// FRAM1
-// CS(IO4)
-// SCK(IO18)
-// SO(IO19)
-// SI(IO23)
-// FRAM2
-// CS(IO32)
-// SCK(IO18)
-// SO(IO19)
-// SI(IO23)
-
-// LED
-// IO26
-
-// MIC
-// IO33
+void loop() {
+}
+#endif
