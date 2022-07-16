@@ -220,7 +220,7 @@ void loop(void) {
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
-Adafruit_ILI9341 tft = Adafruit_ILI9341(5 /*TFT_CS*/, 27 /*TFT_DC*/, 23 /*TFT_MOSI*/, 18/*TFT_CLK*/, -1 /*TFT_RST*/, 12 /*TFT_MISO*/);
+Adafruit_ILI9341 tft = Adafruit_ILI9341(5 /*TFT_CS*/, 27 /*TFT_DC*/, -1 /*TFT_RST*/);
 
 void setup() {
   Serial.begin(9600);
@@ -831,6 +831,7 @@ void loop(){
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
+// this uses soft SPI
 //Adafruit_ILI9341 tft = Adafruit_ILI9341(5 /*TFT_CS*/, 27 /*TFT_DC*/, 23 /*TFT_MOSI*/, 18/*TFT_CLK*/, -1 /*TFT_RST*/, 12 /*TFT_MISO*/);
 Adafruit_ILI9341 tft = Adafruit_ILI9341(5 /*TFT_CS*/, 27 /*TFT_DC*/, -1 /*TFT_RST*/);
 
