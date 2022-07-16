@@ -54,9 +54,6 @@ const camera_config_t cam_conf = {
     .ledc_timer   = LEDC_TIMER_0,
     .ledc_channel = LEDC_CHANNEL_0  
 };
-SPIClass spiSD(HSPI);
-SdFat Sd(&spiSD);
-Adafruit_ImageReader reader(Sd);
 
 // Demo settings
 enum State {
@@ -127,6 +124,15 @@ void SelectDevice( int s_dev ) // Due to unknown reasons, S_DEV instead of int l
         pinMode( CAM_VSYNC, INPUT  );
         pinMode( CAM_PCLK,  INPUT  );
         pinMode( CAM_XCLK,  OUTPUT );
+        Serial.println( "OV7670 camera Init..." );
+        esp_err_t err = cam.init( &cam_conf, CAM_MODE, RGB565 );    // カメラを初期化
+        if( err != ESP_OK ) {
+            Serial.println( "cam.init ERROR" );
+        } else {
+            ov7670_init = true;
+        }
+        cam.setPCLK( 2, DBLV_CLK_x4 );  // PCLK 設定 : 10MHz / (pre+1) * 4 --> 13.3MHz  
+        cam.vflip( false );
     } else { // S_SD
         pinMode( SD_MISO, INPUT ); gpio_set_pull_mode( GPIO_NUM_12, GPIO_PULLDOWN_ONLY );
         pinMode( SD_MOSI, INPUT );
@@ -170,15 +176,6 @@ void setup() {
         Serial.println("No SPI FRAM2 found ... check your connections\r\n");
     }
     SelectDevice( S_CAM );
-    Serial.println( "OV7670 camera Init..." );
-    esp_err_t err = cam.init( &cam_conf, CAM_MODE, RGB565 );    // カメラを初期化
-    if( err != ESP_OK ) {
-        Serial.println( "cam.init ERROR" );
-    } else {
-        ov7670_init = true;
-    }
-    cam.setPCLK( 2, DBLV_CLK_x4 );  // PCLK 設定 : 10MHz / (pre+1) * 4 --> 13.3MHz  
-    cam.vflip( false );
 }
 
 void loop() {
@@ -290,12 +287,16 @@ State draw_from_sd( State state, unsigned long  wait, char *next_scene )
 {
     static bool select;
     if( !select ) {
-      SelectDevice( S_SD );
-      select = true;
+        SelectDevice( S_SD );
+        select = true;
     }
+    SPIClass spiSD(HSPI);
+    SdFat Sd(&spiSD);
+    Adafruit_ImageReader reader(Sd);
     if( Sd.begin( SD_CS, SD_SCK_MHZ( 24 ) ) ) {
         reader.drawBMP("/algyan_logo.bmp", tft, 0, 0);
         SelectDevice( S_CAM );
+        select = false;
         state = next( state );
     }
     return state;
