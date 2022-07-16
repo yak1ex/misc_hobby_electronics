@@ -605,7 +605,15 @@ void setup(){
     } else {
         Serial.println("KO");
     }
+    pinMode(12, INPUT);
+    pinMode(13, INPUT);
+    pinMode(14, INPUT);
+    pinMode(15, INPUT);
     pcf8574.digitalWrite(P4, HIGH); // SD
+    pinMode(12, INPUT);
+    pinMode(13, OUTPUT);
+    pinMode(14, OUTPUT);
+    pinMode(15, OUTPUT);
     pinMode(SS, OUTPUT);
     while (!card.init(SPI_HALF_SPEED, 15 /*CS*/, 13 /*MOSI*/, 12 /*MISO*/, 14 /*SCK*/)) {
       Serial.println("initialization failed. Things to check:");
@@ -666,7 +674,7 @@ void loop(){
 }
 #endif
 
-#if 1
+#if 0
 #include "PCF8574.h"
 #include "FS.h"
 #include "SD.h"
@@ -718,7 +726,15 @@ void setup(){
     } else {
         Serial.println("KO");
     }
+    pinMode(12, INPUT);
+    pinMode(13, INPUT);
+    pinMode(14, INPUT);
+    pinMode(15, INPUT);
     pcf8574.digitalWrite(P4, HIGH); // SD
+    pinMode(12, INPUT);
+    pinMode(13, OUTPUT);
+    pinMode(14, OUTPUT);
+    pinMode(15, OUTPUT);
     pinMode(SS, OUTPUT);
     spiSD.begin(14 /*CLK*/, 12 /*MISO*/, 13 /*MOSI*/, 15 /*CS*/);
     while (!SD.begin(15, spiSD, 24000000)) {
@@ -756,6 +772,58 @@ void loop(){
 }
 #endif
 
+#if 1
+#include "PCF8574.h"
+#include "SPI.h"
+// #define USE_STANDARD_SPI_LIBRARY 2 in SdFatConfig.h
+#include "SdFat.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_ILI9341.h"
+#include "Adafruit_ImageReader.h"
+
+SPIClass spiSD(HSPI);
+SdFat Sd(&spiSD);
+Adafruit_ImageReader reader(Sd);
+
+Adafruit_ILI9341 tft(5 /*TFT_CS*/, 27 /*TFT_DC*/, -1 /*TFT_RST*/);
+
+PCF8574 pcf8574(0x20);
+
+void setup(){
+    Serial.begin(115200);
+    delay(1000);
+    while (!Serial) delay(10);
+    Wire.begin();
+    Serial.print("Init pcf8574...");
+    pcf8574.pinMode(P4, OUTPUT);
+    if(pcf8574.begin()) {
+        Serial.println("OK");
+    } else {
+        Serial.println("KO");
+    }
+    pinMode(12, INPUT);
+    pinMode(13, INPUT);
+    pinMode(14, INPUT);
+    pinMode(15, INPUT);
+    pcf8574.digitalWrite(P4, HIGH); // SD
+    pinMode(12, INPUT_PULLUP);
+    pinMode(13, OUTPUT);
+    pinMode(14, OUTPUT);
+    pinMode(15, OUTPUT);
+    pinMode(SS, OUTPUT);
+    spiSD.begin(14 /*CLK*/, 12 /*MISO*/, 13 /*MOSI*/, 15 /*CS*/);
+    while (!Sd.begin(15, SD_SCK_MHZ(24))) {
+      delay(1000);
+      Serial.println("Card Mount Failed");
+    }
+    tft.begin();
+    tft.setRotation(3);
+    reader.drawBMP("/algyan_logo.bmp", tft, 0, 0);
+}
+
+void loop(){
+}
+#endif
 
 #if 0
 #include "OV7670.h"
