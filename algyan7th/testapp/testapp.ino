@@ -35,7 +35,7 @@ Adafruit_FRAM_SPI fram1( FRAM1_CS ), fram2( FRAM2_CS );
 #else
 #define CAM_WIDTH 176
 #define CAM_HEIGHT 144
-uint16_t buf[CAM_WIDTH*CAM_HEIGHT];
+uint16_t buf[ CAM_WIDTH * CAM_HEIGHT ];
 #endif
 OV7670 cam;
 const camera_config_t cam_conf = {
@@ -120,9 +120,6 @@ void SelectDevice( int s_dev ) // Due to unknown reasons, S_DEV instead of int l
         pinMode( CAM_XCLK,  INPUT );
         pcf8574.digitalWrite( CAM_OR_SD , LOW ); // SD
         delay(100);
-        pinMode( CAM_D4,    INPUT  );
-        pinMode( CAM_VSYNC, INPUT  );
-        pinMode( CAM_PCLK,  INPUT  );
         pinMode( CAM_XCLK,  OUTPUT );
         Serial.println( "OV7670 camera Init..." );
         esp_err_t err = cam.init( &cam_conf, CAM_MODE, RGB565 );    // カメラを初期化
@@ -163,17 +160,17 @@ void setup() {
     tft.begin();
     tft.setRotation( 3 );
     pinMode( LED, OUTPUT );
-    if (fram1.begin()) {
-        Serial.println("Found SPI FRAM1");
+    if( fram1.begin() ) {
+        Serial.println( "Found SPI FRAM1" );
         fram1_init = true;
     } else {
-        Serial.println("No SPI FRAM1 found ... check your connections\r\n");
+        Serial.println( "No SPI FRAM1 found ... check your connections\r\n" );
     }
-    if (fram2.begin()) {
-        Serial.println("Found SPI FRAM2");
+    if( fram2.begin() ) {
+        Serial.println( "Found SPI FRAM2" );
         fram2_init = true;
     } else {
-        Serial.println("No SPI FRAM2 found ... check your connections\r\n");
+        Serial.println( "No SPI FRAM2 found ... check your connections\r\n" );
     }
     SelectDevice( S_CAM );
 }
@@ -290,9 +287,9 @@ State draw_from_sd( State state, unsigned long  wait, char *next_scene )
         SelectDevice( S_SD );
         select = true;
     }
-    SPIClass spiSD(HSPI);
-    SdFat Sd(&spiSD);
-    Adafruit_ImageReader reader(Sd);
+    SPIClass spiSD( HSPI );
+    SdFat Sd( &spiSD );
+    Adafruit_ImageReader reader( Sd );
     if( Sd.begin( SD_CS, SD_SCK_MHZ( 24 ) ) ) {
         reader.drawBMP("/algyan_logo.bmp", tft, 0, 0);
         SelectDevice( S_CAM );
