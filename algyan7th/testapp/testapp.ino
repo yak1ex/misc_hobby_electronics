@@ -114,13 +114,10 @@ enum S_DEV { S_CAM, S_SD };
 void SelectDevice( int s_dev ) // Due to unknown reasons, S_DEV instead of int leads compile error
 {
     if( s_dev == S_CAM ) {
-        pinMode( CAM_D4,    INPUT );
         pinMode( CAM_VSYNC, INPUT );
         pinMode( CAM_PCLK,  INPUT );
-        pinMode( CAM_XCLK,  INPUT );
         pcf8574.digitalWrite( CAM_OR_SD , LOW ); // SD
         delay(100);
-        pinMode( CAM_XCLK,  OUTPUT );
         Serial.println( "OV7670 camera Init..." );
         esp_err_t err = cam.init( &cam_conf, CAM_MODE, RGB565 );    // カメラを初期化
         if( err != ESP_OK ) {
@@ -131,15 +128,12 @@ void SelectDevice( int s_dev ) // Due to unknown reasons, S_DEV instead of int l
         cam.setPCLK( 2, DBLV_CLK_x4 );  // PCLK 設定 : 10MHz / (pre+1) * 4 --> 13.3MHz  
         cam.vflip( false );
     } else { // S_SD
-        pinMode( SD_MISO, INPUT ); gpio_set_pull_mode( GPIO_NUM_12, GPIO_PULLDOWN_ONLY );
         pinMode( SD_MOSI, INPUT );
         pinMode( SD_SCK,  INPUT );
-        pinMode( SD_CS,   INPUT );
         pcf8574.digitalWrite( CAM_OR_SD, HIGH ); // SD
         delay(100);
         pinMode( SD_MOSI, OUTPUT );
         pinMode( SD_SCK,  OUTPUT );
-        pinMode( SD_CS,   OUTPUT );
     }
 }
 
@@ -173,6 +167,7 @@ void setup() {
         Serial.println( "No SPI FRAM2 found ... check your connections\r\n" );
     }
     SelectDevice( S_CAM );
+    gpio_set_pull_mode( GPIO_NUM_12, GPIO_PULLDOWN_ONLY );
 }
 
 void loop() {
