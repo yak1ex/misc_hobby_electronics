@@ -10,7 +10,7 @@
 // * manual install 
 //   * OV7670-ESP32: https://github.com/kobatan/OV7670-ESP32
 
-// SD expectation: SD or SDHC, with FAT12 or FAT16, /algyan_logo.bmp at root directory
+// SD expectation: SD or SDHC, with FAT16 or FAT32, /algyan_logo.bmp at root directory
 
 #include <SPI.h>
 #include "algyan7th.h"
