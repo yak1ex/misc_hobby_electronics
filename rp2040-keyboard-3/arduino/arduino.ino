@@ -24,6 +24,11 @@
 
   https://www.arduino.cc/en/Tutorial/BuiltInExamples/KeyboardLogout
 */
+/*
+  Extracted from https://files.waveshare.com/wiki/RP2040-Keyboard-3/RP2040-Keyboard.zip,
+  with modification.
+  This file is also in the public domain.
+*/
 
 #define OSX 0
 #define WINDOWS 1
@@ -87,18 +92,18 @@ void loop1() {
 
 void loop() {
   if(digitalRead(12) == LOW){
-    Keyboard.press('v');
+    Keyboard.press(KEY_F23);
     flag[2]=1; 
   }else{
-    Keyboard.release('v');
+    Keyboard.release(KEY_F23);
     flag[2]=0; 
   }
 
   if(digitalRead(13) == LOW){
-    Keyboard.press('c');
+    Keyboard.press(KEY_F24);
     flag[1]=1;  
   }else{
-    Keyboard.release('c');
+    Keyboard.release(KEY_F24);
     flag[1]=0;  
   }
   
