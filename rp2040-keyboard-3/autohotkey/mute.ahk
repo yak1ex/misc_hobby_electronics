@@ -11,15 +11,35 @@
 ; so toggle when each of down/up event is triggered.
 
 zoom_mute := 0
+teams_mute := 0
 
-IsZoomExist()
+IsZoomMeetingExist()
 {
   ; Meeting window or Control window for screen share
   return WinExist("ahk_class ZPContentViewWndClass") || WinExist("ahk_class ZPFloatToolbarClass")
 }
 
-; For Zoom: Need to enable global shortcut for Alt+A
-#HotIf IsZoomExist()
+IsTeamsMeetingExist()
+{
+  list := WinGetList("ahk_class TeamsWebView")
+  return (list.Length > 1)
+}
+
+ToggleTeamsMute()
+{
+  if (IsTeamsMeetingExist())
+  {
+    active := WinGetID("A")
+    WinActivate "ahk_class TeamsWebView"
+    Send "+^m"
+    Sleep 1
+    WinActivate active
+  }
+}
+
+; For Zoom: Assuming global shortcut for Alt+A is enabled
+;           we don't need activate Zoom window
+#HotIf IsZoomMeetingExist()
 F24::
 {
   global zoom_mute
@@ -35,3 +55,21 @@ F24 Up::
   zoom_mute := 0
 }
 F23::!a
+
+; For Teams: Need to activate Teams window
+#HotIf IsTeamsMeetingExist()
+F24::
+{
+  global teams_mute
+  if teams_mute == 0 {
+    ToggleTeamsMute()
+    teams_mute := 1
+  }
+}
+F24 Up::
+{
+  global teams_mute
+  ToggleTeamsMute()
+  teams_mute := 0
+}
+F23::ToggleTeamsMute()
