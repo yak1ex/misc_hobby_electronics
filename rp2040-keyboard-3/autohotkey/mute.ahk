@@ -6,6 +6,10 @@
 ; F24 is assigned for push-to-talk
 ; F23 is assigned for toggle to mute
 
+CRITERIA_ZOOMCLASS1 := "ahk_class ZPContentViewWndClass"
+CRITERIA_ZOOMCLASS2 := "ahk_class ZPFloatToolbarClass"
+CRITERIA_TEMASCLASS := "ahk_class TeamsWebView"
+
 ; Space is assigned to a push-to-talk function for zoom
 ; but it is required to activate a zoom window,
 ; so toggle when each of down/up event is triggered.
@@ -16,12 +20,12 @@ teams_mute := 0
 IsZoomMeetingExist()
 {
   ; Meeting window or Control window for screen share
-  return WinExist("ahk_class ZPContentViewWndClass") || WinExist("ahk_class ZPFloatToolbarClass")
+  return WinExist(CRITERIA_ZOOMCLASS1) || WinExist(CRITERIA_ZOOMCLASS2)
 }
 
 IsTeamsMeetingExist()
 {
-  list := WinGetList("ahk_class TeamsWebView")
+  list := WinGetList(CRITERIA_TEMASCLASS)
   return (list.Length > 1)
 }
 
@@ -30,7 +34,7 @@ ToggleTeamsMute()
   if (IsTeamsMeetingExist())
   {
     active := WinGetID("A")
-    WinActivate "ahk_class TeamsWebView"
+    WinActivate CRITERIA_TEMASCLASS
     Send "+^m"
     Sleep 1
     WinActivate active
