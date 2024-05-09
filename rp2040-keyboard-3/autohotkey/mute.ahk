@@ -44,14 +44,14 @@ F24::
 {
   global zoom_mute
   if zoom_mute == 0 {
-    Send "!{a}"
+    Send "!a"
     zoom_mute := 1
   }
 }
 F24 Up::
 {
   global zoom_mute
-  Send "!{a}"
+  Send "!a"
   zoom_mute := 0
 }
 F23::!a
